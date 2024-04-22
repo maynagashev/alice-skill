@@ -2,11 +2,12 @@
 package main
 
 import (
-	"fmt"
+	"github.com/maynagashev/alice-skill/internal/logger"
+	"go.uber.org/zap"
 	"net/http"
 )
 
-// функция main вызывается автоматически при запуске приложения
+// Функция main вызывается автоматически при запуске приложения
 func main() {
 	parseFlags()
 
@@ -15,15 +16,20 @@ func main() {
 	}
 }
 
-// функция run будет полезна при инициализации зависимостей сервера перед запуском
+// Функция run будет полезна при инициализации зависимостей сервера перед запуском
 func run() error {
-	fmt.Println("Running server on", flagRunAddr)
-	return http.ListenAndServe(flagRunAddr, http.HandlerFunc(webhook))
+	if err := logger.Initialize(flagLogLevel); err != nil {
+		return err
+	}
+
+	logger.Log.Info("Running server", zap.String("address", flagRunAddr))
+	return http.ListenAndServe(flagRunAddr, logger.RequestLogger(webhook))
 }
 
-// функция webhook — обработчик HTTP-запроса
+// Функция webhook — обработчик HTTP-запроса
 func webhook(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
+		logger.Log.Debug("got request with bad method", zap.String("method", r.Method))
 		// разрешаем только POST-запросы
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -40,4 +46,6 @@ func webhook(w http.ResponseWriter, r *http.Request) {
         "version": "1.0"
       }
     `))
+
+	logger.Log.Debug("sending HTTP 200 response")
 }
