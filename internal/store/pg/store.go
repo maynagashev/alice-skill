@@ -4,9 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/maynagashev/alice-skill/internal/store"
+	"strings"
 	"time"
 )
 
@@ -135,6 +137,31 @@ func (s Store) SaveMessage(ctx context.Context, userID string, msg store.Message
         VALUES
         ($1, $2, $3, $4);
     `, msg.Sender, userID, msg.Payload, time.Now())
+
+	return err
+}
+
+func (s Store) SaveMessages(ctx context.Context, messages ...store.Message) error {
+	// соберём данные для создания запроса с групповой вставкой
+	var values []string
+	var args []any
+	for i, msg := range messages {
+		// в нашем запросе по 4 параметра на каждое сообщение
+		base := i * 4
+		// PostgreSQL требует шаблоны в формате ($1, $2, $3, $4) для каждой вставки
+		params := fmt.Sprintf("($%d, $%d, $%d, $%d)", base+1, base+2, base+3, base+4)
+		values = append(values, params)
+		args = append(args, msg.Sender, msg.Recipient, msg.Payload, msg.Time)
+	}
+
+	// составляем строку запроса
+	query := `
+  INSERT INTO messages
+  (sender, recepient, payload, sent_at)
+  VALUES ` + strings.Join(values, ",") + `;`
+
+	// добавляем новые сообщения в БД
+	_, err := s.conn.ExecContext(ctx, query, args...)
 
 	return err
 }

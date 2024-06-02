@@ -80,6 +80,20 @@ func (mr *MockStoreMockRecorder) ListMessages(ctx, userID interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListMessages", reflect.TypeOf((*MockStore)(nil).ListMessages), ctx, userID)
 }
 
+// RegisterUser mocks base method.
+func (m *MockStore) RegisterUser(ctx context.Context, userID, username string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RegisterUser", ctx, userID, username)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RegisterUser indicates an expected call of RegisterUser.
+func (mr *MockStoreMockRecorder) RegisterUser(ctx, userID, username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterUser", reflect.TypeOf((*MockStore)(nil).RegisterUser), ctx, userID, username)
+}
+
 // SaveMessage mocks base method.
 func (m *MockStore) SaveMessage(ctx context.Context, userID string, msg store.Message) error {
 	m.ctrl.T.Helper()
@@ -92,4 +106,23 @@ func (m *MockStore) SaveMessage(ctx context.Context, userID string, msg store.Me
 func (mr *MockStoreMockRecorder) SaveMessage(ctx, userID, msg interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveMessage", reflect.TypeOf((*MockStore)(nil).SaveMessage), ctx, userID, msg)
+}
+
+// SaveMessages mocks base method.
+func (m *MockStore) SaveMessages(ctx context.Context, messages ...store.Message) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range messages {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SaveMessages", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SaveMessages indicates an expected call of SaveMessages.
+func (mr *MockStoreMockRecorder) SaveMessages(ctx interface{}, messages ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, messages...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveMessages", reflect.TypeOf((*MockStore)(nil).SaveMessages), varargs...)
 }
